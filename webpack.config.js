@@ -1,4 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 console.log(3,isDev,process.env.NODE_ENV)
@@ -20,7 +22,7 @@ module.exports = {
       },
       {
         test:/\.css$/,
-        use:['style-loader','css-loader']
+        use:[MiniCssExtractPlugin.loader,'css-loader']
       },
       {
         test: /\.(png|jpg|gif|jpeg|webp|svg|eot|ttf|woff|woff2)$/,
@@ -79,7 +81,10 @@ module.exports = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns:['**/*', '!aaa*'],
 
-    })
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[name].[hash:6].min.css',
+    }),
   ],
   devServer:{
     // contentBase: path.join(__dirname, 'dist'), //在配置了 html-webpack-plugin 的情况下， contentBase 不会起任何作用
