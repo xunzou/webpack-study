@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
@@ -8,8 +9,8 @@ module.exports = {
   entry:'./src/index.js',
   output:{
     path: path.resolve(__dirname,'dist'),
-    filename: '[name].[hash:6].bundle.js',
-    publicPath:'/',
+    filename: 'assets/js/[name].[hash:6].bundle.js',
+    publicPath:'',
 
   },
   mode: isDev ? 'development' : 'production',
@@ -22,7 +23,14 @@ module.exports = {
       },
       {
         test:/\.css$/,
-        use:[MiniCssExtractPlugin.loader,'css-loader']
+        use:[{
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === 'development',
+              reloadAll: true,
+            },
+          },'css-loader'
+        ]
       },
       {
         test: /\.(png|jpg|gif|jpeg|webp|svg|eot|ttf|woff|woff2)$/,
@@ -30,12 +38,11 @@ module.exports = {
           {
             loader: 'url-loader',
             options: {
-              limit: 10240, //10K
+              limit: 1024, //10K
               esModule: false,
-              name: '[name]_[hash:6].[ext]',
-              outpath:'assets',
+              name: 'assets/images/[name]_[hash:6].[ext]',
             }
-          }
+          },
         ],
         exclude: /node_modules/,
       },
@@ -80,11 +87,19 @@ module.exports = {
     }),
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns:['**/*', '!aaa*'],
-
     }),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash:6].min.css',
+      filename: 'assets/style/[name].[hash:6].min.css',
+      chunkFilename: '[id].css',
     }),
+    new OptimizeCSSAssetsPlugin({
+      // assetNameRegExp: /index\.css$/g,
+      cssProcessor: require('cssnano'),
+      cssProcessorPluginOptions: {
+        preset: ['default', { discardComments: { removeAll: true } }]
+      },
+      canPrint: true,
+    })
   ],
   devServer:{
     // contentBase: path.join(__dirname, 'dist'), //在配置了 html-webpack-plugin 的情况下， contentBase 不会起任何作用

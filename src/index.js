@@ -1,5 +1,5 @@
 import './assets/css/index.css'
-
+import './assets/images/baidu.png'
 class Animal {
   constructor(name){
     this.name = name
