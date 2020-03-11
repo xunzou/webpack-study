@@ -1,8 +1,10 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');const path = require('path');
+const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 console.log(3,isDev,process.env.NODE_ENV)
 module.exports = {
@@ -29,7 +31,8 @@ module.exports = {
               hmr: process.env.NODE_ENV === 'development',
               reloadAll: true,
             },
-          },'css-loader'
+          },
+          'css-loader'
         ]
       },
       {
@@ -89,7 +92,7 @@ module.exports = {
       cleanOnceBeforeBuildPatterns:['**/*', '!aaa*'],
     }),
     new MiniCssExtractPlugin({
-      filename: 'assets/style/[name].[hash:6].min.css',
+      filename: isDev ? 'assets/style/[name].css' : 'assets/style/[name].[hash:6].min.css',
       chunkFilename: '[id].css',
     }),
     new OptimizeCSSAssetsPlugin({
@@ -99,7 +102,19 @@ module.exports = {
         preset: ['default', { discardComments: { removeAll: true } }]
       },
       canPrint: true,
-    })
+    }),
+    new CopyWebpackPlugin([
+      {
+          from: path.resolve(__dirname, 'public', 'assets'),
+          to: path.resolve(__dirname, 'dist', 'assets'),
+          // flatten: true, //这个属性是直接拷贝到目录下，不按照原始的目录去拷贝
+          //  ignore: ['.*'] //忽略拷贝指定的文件可以模糊匹配
+      },
+      //还可以继续配置其它要拷贝的文件
+    ]),
+
+    // 热更新
+    new webpack.HotModuleReplacementPlugin() //热更新插件
   ],
   devServer:{
     // contentBase: path.join(__dirname, 'dist'), //在配置了 html-webpack-plugin 的情况下， contentBase 不会起任何作用
