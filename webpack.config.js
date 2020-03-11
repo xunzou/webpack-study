@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -36,14 +37,36 @@ module.exports = {
         ]
       },
       {
-        test: /\.(png|jpg|gif|jpeg|webp|svg|eot|ttf|woff|woff2)$/,
+        test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         use: [
           {
             loader: 'url-loader',
             options: {
-              limit: 1024, //10K
+              // 图片低于 10k 会被转换成 base64 格式的 dataUrl
+              limit: 10240,
+              // [hash] 占位符和 [contenthash] 是相同的含义
+              // 都是表示文件内容的 hash 值，默认是使用 md5 hash 算法
+              // name: '[name].[contenthash].[ext]',
+              // 保存到 images 文件夹下面
+              // outputPath: 'images',
               esModule: false,
-              name: 'assets/images/[name]_[hash:6].[ext]',
+              name: '[name]_[hash:6].[ext]',
+              outputPath: 'assets/images/',
+            },
+          },
+        ],
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(webp|svg|eot|ttf|otf|woff|woff2)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10240, //10K
+              esModule: false,
+              name: '[name]_[hash:6].[ext]',
+              outputPath: 'assets/fonts/',
             }
           },
         ],
